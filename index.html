@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quiz Mini App</title>
+    <title>Кто хочет стать миллионером - ТЫ</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #080d1a;
-            --card-bg: rgba(18, 25, 46, 0.95);
-            --neon-blue: #3b82f6;
-            --neon-glow: rgba(59, 130, 246, 0.4);
-            --border-color: #1e3a7a;
+            --bg-dark: #030718;
+            --card-bg: #09102b;
+            --border-blue: #1c3275;
+            --gold-accent: #f59e0b;
+            --gold-glow: rgba(245, 158, 11, 0.5);
+            --correct-green: #10b981;
+            --wrong-red: #ef4444;
             --text-main: #ffffff;
-            --text-muted: #7f95d1;
-            --correct-green: #00e676;
-            --wrong-red: #ff5252;
+            --text-muted: #94a3b8;
         }
 
         * {
@@ -24,239 +24,379 @@
             padding: 0;
             user-select: none;
             -webkit-user-select: none;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
         body {
-            background: radial-gradient(circle at center, #101c38 0%, #050814 100%);
+            background: radial-gradient(circle at center, #0a1338 0%, #02040d 100%);
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 12px;
+            padding: 16px;
             overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140%;
+            height: 140%;
+            background: radial-gradient(ellipse at top, rgba(29, 78, 216, 0.25) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
         }
 
         .app-container {
             width: 100%;
-            max-width: 600px;
+            max-width: 540px;
             display: flex;
             flex-direction: column;
             gap: 16px;
+            z-index: 1;
         }
 
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-
-        .top-btn {
-            background: var(--card-bg);
-            border: 1.5px solid var(--border-color);
+        .ladder-toggle-btn {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--border-blue);
             border-radius: 20px;
-            color: var(--text-muted);
-            padding: 6px 12px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
+            color: var(--gold-accent);
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 800;
             cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            z-index: 10;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            height: 36px;
-        }
-
-        .top-btn:active {
-            transform: scale(0.95);
-            border-color: var(--neon-blue);
-            color: #fff;
-        }
-
-        .restart-btn {
-            background: rgba(255, 82, 82, 0.15);
-            border: 1.5px solid var(--wrong-red);
-            color: #ff8a8a;
-            box-shadow: 0 0 12px rgba(255, 82, 82, 0.4);
-        }
-
-        .restart-btn:active {
-            border-color: #fff;
-            color: #fff;
-            box-shadow: 0 0 18px var(--wrong-red);
         }
 
         .card {
-            background: var(--card-bg);
-            border: 1.5px solid var(--border-color);
+            background: rgba(9, 16, 43, 0.95);
+            border: 1.5px solid var(--border-blue);
             border-radius: 24px;
-            padding: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 20px var(--neon-glow);
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
             display: flex;
             flex-direction: column;
             gap: 16px;
         }
 
-        .quiz-header {
+        .header-info {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 13px;
+            font-size: 14px;
+            font-weight: 800;
             color: var(--text-muted);
-            font-weight: 600;
-            text-transform: uppercase;
             letter-spacing: 1px;
+            margin-top: 10px;
         }
 
-        .question-text {
-            font-size: 18px;
+        .prize-text {
+            color: var(--gold-accent);
+            text-shadow: 0 0 10px var(--gold-glow);
+        }
+
+        .question-box {
+            background: #0d173d;
+            border: 1.5px solid var(--border-blue);
+            border-radius: 16px;
+            padding: 20px;
+            font-size: 17px;
             font-weight: 700;
             line-height: 1.4;
-            color: #fff;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
         }
 
         .options-list {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
 
         .option-btn {
-            background: rgba(25, 35, 65, 0.6);
-            border: 1.5px solid var(--border-color);
-            border-radius: 14px;
-            padding: 14px 16px;
+            background: #0d173d;
+            border: 1.5px solid var(--border-blue);
+            border-radius: 30px;
+            padding: 15px 20px;
             color: #fff;
             font-size: 15px;
-            font-weight: 500;
+            font-weight: 600;
             text-align: left;
             cursor: pointer;
             transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
         }
 
-        .option-btn:active {
-            transform: scale(0.98);
-            background: rgba(59, 130, 246, 0.2);
-            border-color: var(--neon-blue);
+        .option-prefix {
+            color: var(--gold-accent);
+            font-weight: 800;
+        }
+
+        .option-btn.selected {
+            border-color: var(--gold-accent);
+            background: rgba(245, 158, 11, 0.15);
+            box-shadow: 0 0 20px var(--gold-glow);
+            animation: pulse-gold 0.8s infinite alternate;
+        }
+
+        @keyframes pulse-gold {
+            from { box-shadow: 0 0 10px var(--gold-glow); }
+            to { box-shadow: 0 0 25px var(--gold-glow); }
         }
 
         .option-btn.correct {
-            background: rgba(0, 230, 118, 0.2);
-            border-color: var(--correct-green);
-            color: #69f0ae;
+            border-color: var(--correct-green) !important;
+            background: rgba(16, 185, 129, 0.25) !important;
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.6) !important;
+            color: #a7f3d0;
         }
 
         .option-btn.wrong {
-            background: rgba(255, 82, 82, 0.2);
-            border-color: var(--wrong-red);
-            color: #ff8a8a;
+            border-color: var(--wrong-red) !important;
+            background: rgba(239, 68, 68, 0.25) !important;
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.6) !important;
+            color: #fca5a5;
         }
 
         .lifelines {
             display: flex;
-            gap: 10px;
-            margin-top: 5px;
+            gap: 8px;
+            justify-content: center;
         }
 
         .lifeline-btn {
             flex: 1;
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid var(--neon-blue);
-            border-radius: 12px;
-            padding: 10px;
-            color: #93c5fd;
+            background: #0d173d;
+            border: 1.5px solid var(--border-blue);
+            border-radius: 20px;
+            padding: 10px 6px;
+            color: #fff;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            text-align: center;
             transition: all 0.2s;
+            text-align: center;
         }
 
         .lifeline-btn:disabled {
-            opacity: 0.4;
+            opacity: 0.3;
             cursor: not-allowed;
-            border-color: var(--border-color);
-            color: var(--text-muted);
+            border-color: #1e293b;
         }
+
+        .sidebar-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(2, 4, 13, 0.85);
+            display: flex;
+            justify-content: flex-start;
+            z-index: 100;
+            transition: 0.3s;
+        }
+
+        .sidebar-content {
+            width: 300px;
+            height: 100%;
+            background: #09102b;
+            border-right: 2px solid var(--border-blue);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+        }
+
+        .ladder-section-title {
+            color: var(--gold-accent);
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin: 10px 0 4px 4px;
+            letter-spacing: 1px;
+        }
+
+        .ladder-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .ladder-item.active {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--gold-accent);
+            border: 1px solid var(--gold-accent);
+            box-shadow: 0 0 10px var(--gold-glow);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(2, 4, 13, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .chart-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 150px;
+            margin-top: 15px;
+            gap: 12px;
+        }
+
+        .chart-bar-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            height: 100%;
+            justify-content: flex-end;
+        }
+
+        .chart-bar {
+            width: 100%;
+            background: var(--border-blue);
+            border-radius: 6px 6px 0 0;
+            transition: height 0.8s ease-out;
+        }
+
+        .chart-bar.highlight {
+            background: var(--gold-accent);
+            box-shadow: 0 0 12px var(--gold-glow);
+        }
+
+        .hidden { display: none !important; }
 
         .result-screen {
             text-align: center;
-            padding: 20px 10px;
-            display: flex;
-            flex-direction: column;
             gap: 20px;
         }
 
-        .result-title {
-            font-size: 26px;
+        .restart-btn-glow {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1.5px solid var(--wrong-red);
+            color: #ff8a8a;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+            border-radius: 30px;
+            padding: 14px;
+            font-size: 16px;
             font-weight: 800;
-            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .result-score {
-            font-size: 40px;
-            font-weight: 900;
-            color: var(--neon-blue);
-            text-shadow: 0 0 15px var(--neon-glow);
-        }
-
-        .hidden {
-            display: none !important;
+        .restart-btn-glow:active {
+            box-shadow: 0 0 25px var(--wrong-red);
+            background: rgba(239, 68, 68, 0.4);
         }
     </style>
 </head>
 <body>
 
+    <button class="ladder-toggle-btn" onclick="toggleSidebar()">📊 Призы (30)</button>
+
     <div class="app-container">
-        <!-- Экран выбора сложности -->
-        <div id="difficulty-card" class="card result-screen">
-            <div class="result-title" style="font-size: 22px;">Викторина «ТЫ» (YOU)</div>
-            <div style="color: var(--text-muted); font-size: 14px;">Выберите уровень сложности:</div>
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
-                <button class="option-btn" style="text-align: center; font-weight: 700; border-color: var(--correct-green); color: #69f0ae;" onclick="selectDifficulty('easy')">🟢 Лёгкий (10 вопросов)</button>
-                <button class="option-btn" style="text-align: center; font-weight: 700; border-color: var(--neon-blue); color: #93c5fd;" onclick="selectDifficulty('medium')">🟡 Средний (10 вопросов)</button>
-                <button class="option-btn" style="text-align: center; font-weight: 700; border-color: var(--wrong-red); color: #ff8a8a;" onclick="selectDifficulty('hard')">🔴 Сложный (10 вопросов)</button>
-            </div>
-        </div>
-
-        <!-- Верхняя панель (скрыта на выборе сложности) -->
-        <div id="top-bar" class="top-bar hidden">
-            <div id="score-display" class="top-btn">🏆 Сет: $0</div>
-            <button class="top-btn restart-btn" onclick="goToMenu()">🔄 Меню</button>
-        </div>
-
-        <!-- Карточка викторины -->
-        <div id="quiz-card" class="card hidden">
-            <div class="quiz-header">
-                <span id="question-counter">Вопрос 1 из 10</span>
-                <span id="timer">⏱ 30с</span>
-            </div>
-            
-            <div id="question-container" class="question-text">
-                Загрузка вопроса...
+        <!-- Игровой экран -->
+        <div id="quiz-card" class="card">
+            <div class="header-info">
+                <span id="question-counter">ВОПРОС 1</span>
+                <span id="prize-counter" class="prize-text">$100</span>
             </div>
 
-            <div id="options-container" class="options-list">
-                <!-- Варианты ответов -->
-            </div>
+            <div id="question-text" class="question-box">...</div>
 
             <div class="lifelines">
-                <button id="fifty-btn" class="lifeline-btn" onclick="useFiftyFifty()">50 / 50</button>
+                <button id="fifty-btn" class="lifeline-btn" onclick="useFiftyFifty()">50:50</button>
+                <button id="phone-btn" class="lifeline-btn" onclick="usePhone()">📞 Звонок</button>
                 <button id="audience-btn" class="lifeline-btn" onclick="useAudience()">👥 Помощь зала</button>
+            </div>
+
+            <div id="options-container" class="options-list"></div>
+        </div>
+
+        <!-- Боковая панель лесенки (30 вопросов по уровням) -->
+        <div id="sidebar-modal" class="sidebar-modal hidden" onclick="toggleSidebar()">
+            <div class="sidebar-content" onclick="event.stopPropagation()">
+                <h3 style="color: var(--gold-accent); text-align: center; margin-bottom: 5px;">ДЕНЕЖНАЯ ШКАЛА</h3>
+                <div id="ladder-list"></div>
+                <button class="option-btn" style="justify-content: center; margin-top: 10px;" onclick="toggleSidebar()">ЗАКРЫТЬ</button>
             </div>
         </div>
 
-        <!-- Экран результатов -->
+        <!-- Модальное окно ПОМОЩЬ ЗАЛА -->
+        <div id="audience-modal" class="modal hidden">
+            <div class="card" style="width: 100%; max-width: 340px;">
+                <h3 style="text-align: center; font-size: 16px; color: var(--gold-accent);">МНЕНИЕ ЗАЛА</h3>
+                <div class="chart-container">
+                    <div class="chart-bar-wrap">
+                        <span id="val-A" style="font-size: 11px;">0%</span>
+                        <div id="bar-A" class="chart-bar" style="height: 0%;"></div>
+                        <span style="font-weight: 800; color: var(--gold-accent);">A</span>
+                    </div>
+                    <div class="chart-bar-wrap">
+                        <span id="val-B" style="font-size: 11px;">0%</span>
+                        <div id="bar-B" class="chart-bar" style="height: 0%;"></div>
+                        <span style="font-weight: 800; color: var(--gold-accent);">B</span>
+                    </div>
+                    <div class="chart-bar-wrap">
+                        <span id="val-C" style="font-size: 11px;">0%</span>
+                        <div id="bar-C" class="chart-bar" style="height: 0%;"></div>
+                        <span style="font-weight: 800; color: var(--gold-accent);">C</span>
+                    </div>
+                    <div class="chart-bar-wrap">
+                        <span id="val-D" style="font-size: 11px;">0%</span>
+                        <div id="bar-D" class="chart-bar" style="height: 0%;"></div>
+                        <span style="font-weight: 800; color: var(--gold-accent);">D</span>
+                    </div>
+                </div>
+                <button class="option-btn" style="justify-content: center; margin-top: 15px;" onclick="closeModal('audience-modal')">ЗАКРЫТЬ</button>
+            </div>
+        </div>
+
+        <!-- Модальное окно ЗВОНОК ДРУГУ (Джо Голдберг) -->
+        <div id="phone-modal" class="modal hidden">
+            <div class="card" style="width: 100%; max-width: 340px; text-align: center; gap: 15px;">
+                <h3 style="font-size: 16px; color: var(--gold-accent);">ЗВОНОК ДЖО ГОЛДБЕРГУ</h3>
+                <p id="phone-text" style="font-size: 14px; color: var(--text-muted); line-height: 1.4;"></p>
+                <button class="option-btn" style="justify-content: center;" onclick="closeModal('phone-modal')">ПОНЯТНО</button>
+            </div>
+        </div>
+
+        <!-- Результат -->
         <div id="result-card" class="card result-screen hidden">
-            <div class="result-title">Викторина окончена!</div>
-            <div style="color: var(--text-muted); font-size: 14px;">Ваш итоговый выигрыш:</div>
-            <div id="final-score" class="result-score">$0</div>
-            <button class="option-btn" style="text-align: center; background: var(--neon-blue); font-weight: 700;" onclick="goToMenu()">В главное меню</button>
+            <h2 style="font-size: 24px; color: var(--wrong-red);">ИГРА ОКОНЧЕНА</h2>
+            <div style="font-size: 13px; color: var(--text-muted);">ваш итоговый выигрыш</div>
+            <div id="final-score" style="font-size: 36px; font-weight: 900; color: var(--gold-accent);">$0</div>
+            <button class="restart-btn-glow" onclick="startGame()">НОВАЯ ИГРА</button>
         </div>
     </div>
 
@@ -264,195 +404,263 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const prizes = ["$1,000", "$5,000", "$10,000", "$25,000", "$50,000", "$100,000", "$250,000", "$500,000", "$1,000,000", "$2,000,000"];
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        // База из 25 вопросов для каждого уровня
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const now = audioCtx.currentTime;
+            
+            if (type === 'select') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.exponentialRampToValueAtTime(110, now + 0.4);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'correct') {
+                [261.63, 329.63, 392.00, 523.25].forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+                    gain.gain.setValueAtTime(0.3, now + idx * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.1 + 0.5);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + idx * 0.1);
+                    osc.stop(now + idx * 0.1 + 0.5);
+                });
+            } else if (type === 'wrong') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.linearRampToValueAtTime(40, now + 0.8);
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.8);
+            }
+        }
+
+        // Шкала из 30 призов: от $100 до $1,000,000
+        const prizes = [
+            "$100", "$200", "$300", "$400", "$500", "$600", "$700", "$800", "$900", "$1,000",
+            "$2,000", "$4,000", "$8,000", "$12,000", "$16,000", "$20,000", "$24,000", "$28,000", "$30,000", "$32,000",
+            "$64,000", "$125,000", "$250,000", "$350,000", "$500,000", "$650,000", "$750,000", "$850,000", "$950,000", "$1,000,000"
+        ];
+
         const banks = {
             easy: [
-                {q: "Как звали главного героя-убийцу в первом сезоне сериала «Ты»?", options: ["Джо Голдберг", "Дэн Смит", "Райан Гудман", "Кэвин Вуд"], correct: 0},
-                {q: "В каком городе работал книжный магазин, где начинаются события 1 сезона?", options: ["Лос-Анджелес", "Нью-Йорк", "Чикаго", "Бостон"], correct: 1},
-                {q: "Как звали девушку, в которую Джо влюбился в первом сезоне?", options: ["Лав Куинн", "Мэриен Беллами", "Гвиневра Бек", "Натали Пратт"], correct: 2},
-                {q: "Какое имя берет Джо, переехав в Лос-Анджелес во втором сезоне?", options: ["Уилл Беттельгейм", "Пол Браун", "Джонатан Мур", "Чарли Брэдли"], correct: 0},
-                {q: "Кто оказывается главным манипулятором и убийцей во втором сезоне?", options: ["Кандис Стоун", "Лав Куинн", "Делайла Куинн", "Фифти"], correct: 1},
-                {q: "Как называется элитный пригород, куда переезжают Джо и Лав в третьем сезоне?", options: ["Мадрина", "Брекли", "Карлсбад", "Фрэдрик"], correct: 0},
-                {q: "Кто является соседкой Джо и Лав, вызывающей у Джо интерес в 3 сезоне?", options: ["Натали Пратт", "Шерри Конрад", "Мэттью Ингленд", "Мэриен Беллами"], correct: 0},
-                {q: "В каком европейском городе разворачивается первая половина четвёртого сезона?", options: ["Париж", "Рим", "Лондон", "Берлин"], correct: 2},
-                {q: "Как назывался анонимный сталкер, преследовавший Джо в Лондоне в 4 сезоне?", options: ["Убийца из Кит-Сот", "Богатый мажор", "Профессор Рис Монро", "Адам Пратт"], correct: 2},
-                {q: "Какая главная моральная тема проходит через весь сериал «Ты»?", options: ["Романтическая любовь спасает мир", "Опасность токсичной одержимости под маской заботы", "Польза соцсетей", "Успешный книжный бизнес"], correct: 1},
+                {q: "Как звали главного героя в первом сезоне сериала «Ты»?", options: ["Джо Голдберг", "Дэн Смит", "Райан Гудман", "Кэвин Вуд"], correct: 0},
+                {q: "В каком городе работал книжный магазин в 1 сезоне?", options: ["Лос-Анджелес", "Нью-Йорк", "Чикаго", "Бостон"], correct: 1},
+                {q: "Как звали девушку, в которую Джо влюбился в 1 сезоне?", options: ["Лав Куинн", "Мэриен Беллами", "Гвиневра Бек", "Натали Пратт"], correct: 2},
+                {q: "Какое имя берет Джо, переехав во 2 сезоне?", options: ["Уилл Беттельгейм", "Пол Браун", "Джонатан Мур", "Чарли Брэдли"], correct: 0},
+                {q: "Кто оказывается главным манипулятором во 2 сезоне?", options: ["Кандис Стоун", "Лав Куинн", "Делайла Куинн", "Фифти"], correct: 1},
+                {q: "В каком европейском городе разворачивается 4 сезон?", options: ["Париж", "Рим", "Лондон", "Берлин"], correct: 2},
                 {q: "Кем работал Джо в книжном магазине?", options: ["Директором", "Управляющим / клерком", "Охранником", "Уборщиком"], correct: 1},
+                {q: "Как звали сына Джо и Лав в 3 сезоне?", options: ["Генри", "Эдвард", "Артур", "Леонард"], correct: 0},
+                {q: "Кем работала Лав Куинн?", options: ["Шеф-поваром и пекарем", "Учительницей", "Журналисткой", "Актрисой"], correct: 0},
+                {q: "Какая актриса исполнила роль Лав Куинн?", options: ["Виктория Педретти", "Элизабет Леил", "Дженна Ортега", "Шарлотта Ричи"], correct: 0},
                 {q: "Как звали лучшую подругу Бек в первом сезоне?", options: ["Пич Сэлинджер", "Анника", "Линн", "Все варианты верны"], correct: 3},
-                {q: "Что Джо часто использовал для слежки за своими жертвами?", options: ["Социальные сети и окна", "Дроны с камерами", "Частных детективов", "Спутник"], correct: 0},
-                {q: "Какой стеклянный предмет является фирменным 'инструментом' Джо?", options: ["Стеклянная витрина для книг", "Звуконепроницаемая стеклянная камера", "Стеклянный шар", "Аквариум"], correct: 1},
-                {q: "Как звали сына Джо и Лав в третьем сезоне?", options: ["Генри", "Эдвард", "Артур", "Леонард"], correct: 0},
-                {q: "Кем работала Лав Куинн?",options: ["Шеф-поваром и пекарем", "Учительницей", "Журналисткой", "Актрисой"], correct: 0},
-                {q: "Какое хобби было у Форти, брата Лав?", options: ["Писательство и сценарии", "Профессиональный спорт", "Программирование", "Рисование"], correct: 0},
-                {q: "Куда Джо отправляется в самом конце четвертого сезона?", options: ["Снова в Нью-Йорк", "В Лондон навсегда", "В Париж", "В Токио"], correct: 0},
-                {q: "Как звали студентку Джо в четвертом сезоне, к которой он испытывал симпатию?", options: ["Кейт Локвуд", "Надия Сарвар", "Фиби", "Леди Мари"], correct: 1},
+                {q: "Что Джо часто использовал для слежки за своими жертвами?", options: ["Соцсети и окна", "Дроны", "Частных детективов", "Спутник"], correct: 0},
+                {q: "Какой стеклянный предмет является фирменным 'инструментом' Джо?", options: ["Витрина", "Звуконепроницаемая стеклянная камера", "Шар", "Аквариум"], correct: 1},
+                {q: "Какое хобби было у Форти, брата Лав?", options: ["Писательство и сценарии", "Спорт", "Программирование", "Рисование"], correct: 0},
+                {q: "Куда Джо отправляется в самом конце четвертого сезона?", options: ["Снова в Нью-Йорк", "В Лондон", "В Париж", "В Токио"], correct: 0},
+                {q: "Как звали студентку Джо в 4 сезоне?", options: ["Кейт", "Надия Сарвар", "Фиби", "Леди Мари"], correct: 1},
                 {q: "Какое животное было у Пич Сэлинджер?", options: ["Собака", "Кот", "Попугай", "У нее не было питомца"], correct: 0},
                 {q: "Кто подставил Джо в конце первого сезона?", options: ["Бек (в дневнике)", "Кандис", "Доктор Ники", "Никто"], correct: 0},
-                {q: "Какое блюдо часто готовила Лав для устранения неугодных людей?",options: ["Особые кексы с отравой", "Лазанью", "Пирог с ядовитыми грибами", "Суп"], correct: 2},
+                {q: "Какое блюдо часто готовила Лав для устранения людей?", options: ["Кексы с отравой", "Лазанью", "Пирог с ядовитыми грибами", "Суп"], correct: 2},
                 {q: "Как звали мужа Лав до Джо?", options: ["Джеймс", "Мэтью", "Пол", "Том"], correct: 0},
-                {q: "Какую книгу Джо считал своей любимой в детстве?", options: ["Граф Монте-Кристо", "Преступление и наказание", "Приключения Тома Сойера", "Над пропастью во ржи"], correct: 0},
-                {q: "В каком сезоне появляется персонаж Мариен Беллами?", options: ["1 сезон", "2 сезон", "3 сезон", "4 сезон"], correct: 2}
+                {q: "Какую книгу Джо считал своей любимой в детстве?", options: ["Граф Монте-Кристо", "Преступление и наказание", "Том Сойер", "Над пропастью во ржи"], correct: 0},
+                {q: "В каком сезоне появляется Мариен Беллами?", options: ["1 сезон", "2 сезон", "3 сезон", "4 сезон"], correct: 2},
+                {q: "Как звали отца Лав и Форти?", options: ["Рэй Куинн", "Джордж", "Артур", "Чарльз"], correct: 0},
+                {q: "Кто узнал Джо в Лондоне самым первым в 4 сезоне?", options: ["Малкольм", "Рис Монро", "Кейт", "Никто"], correct: 0},
+                {q: "Какая тема проходит через весь сериал?", options: ["Романтика", "Опасность токсичной одержимости под маской заботы", "Соцсети", "Бизнес"], correct: 1}
             ],
             medium: [
-                {q: "Какую реальную книгу дал почитать Джо своему ученику Пако в 1 сезоне?", options: ["Преступление и наказание", "Война и мир", "Великий Гэтсби", "Одиссея"], correct: 0},
-                {q: "Как звали детектива, который расследовал исчезновение Бек в 1 сезоне?", options: ["Дэниелс", "Куинн", "Манкивич", "Элкинс"], correct: 2},
-                {q: "Какую профессию имела мать Джо, судя по воспоминаниям из детства?", options: ["Медсестра", "Официантка", "У него не было матери", "Она бросила его в приюте (на самом деле воспитывался в интернате/была суровой)"], correct: 3},
-                {q: "Кто помог Джо избавиться от тела Бена О'Рейлли в 1 сезоне?", options: ["Никто, он справился сам", "Пич Сэлинджер", "Рон (парень соседки)", "Пако"], correct: 0},
-                {q: "Какой фальшивый диагноз поставил себе Джо во 2 сезоне, чтобы внедриться в клинику?", options: ["Амнезия", "Опухоль мозга", "Агорафобия", "Наркотическая зависимость"], correct: 1},
-                {q: "Как звали опекуна Джо в детском доме, оставившего у него психологическую травму?", options: ["Мистер Муни", "Доктор Ники", "Рон", "Директор Карл"], correct: 0},
-                {q: "Какая деталь выдала Джо в квартире Пич Сэлинджер?", options: ["Его бейсболка", "Баночка с его мочой для анализов", "Его блокнот", "Его кредитка"], correct: 1},
-                {q: "Какой национальности был охранник Рон, избивавший маму Клаудии?", options: ["Он был военным / бывшим копом", "Испанец", "Ирландец", "Афроамериканец"], correct: 0},
+                {q: "Какую книгу дал почитать Джо своему ученику Пако в 1 сезоне?", options: ["Преступление и наказание", "Война и мир", "Великий Гэтсби", "Одиссея"], correct: 0},
+                {q: "Как звали опекуна Джо в детском доме?", options: ["Мистер Муни", "Доктор Ники", "Рон", "Директор Карл"], correct: 0},
+                {q: "Какая деталь выдала Джо в квартире Пич Сэлинджер?", options: ["Его бейсболка", "Баночка с его мочой", "Его блокнот", "Кредитка"], correct: 1},
+                {q: "Кто застрелил Лав Куинн в финале 3 сезона?", options: ["Джо", "Мэтью Ингленд", "Она сама", "Никто"], correct: 0},
+                {q: "Какой бизнес пытались вести Джо и Лав в 3 сезоне?", options: ["Пекарню-кафе", "Книжный ларек", "Ферму", "Цветочный магазин"], correct: 0},
+                {q: "Какое прозвище пресса дала серийному убийце в 4 сезоне?", options: ["Убийца из Ист-Энда", "Рыцарь-убийца", "Убийца из высшего света (Eat the Rich)", "Британский мясник"], correct: 2},
+                {q: "Какую книгу писал Форти Куинн во 2 сезоне?", options: ["Сценарий по жизни Бек", "Автобиографию", "Фантастику", "Кулинарную книгу"], correct: 0},
+                {q: "В каком году вышел 1 сезон сериала «Ты»?", options: ["2016", "2017", "2018", "2019"], correct: 2},
+                {q: "Как звали мужа Лав до Джо?", options: ["Джеймс", "Мэтью", "Пол", "Том"], correct: 0},
+                {q: "Какая болезнь была у сына Джо (Генри) в 3 сезоне?", options: ["Корь", "Коклюш", "Аллергия", "Воспаление уха"], correct: 1},
+                {q: "Как звали детектива, расследовавшего исчезновение Бек?", options: ["Дэниелс", "Куинн", "Манкивич", "Элкинс"], correct: 2},
+                {q: "Какой фальшивый диагноз поставил себе Джо во 2 сезоне?", options: ["Амнезия", "Опухоль мозга", "Агорафобия", "Зависимость"], correct: 1},
                 {q: "Какое имя на самом деле носил фальшивый Уилл Беттельгейм?", options: ["Питер", "Тони", "Бетт", "Мэтт"], correct: 0},
-                {q: "В какой книге Джо прятал заначку и ключ от стеклянной клетки в 1 сезоне?", options: ["Тайная история", "Властелин Колец", "Джейн Эйр", "Никакой, в полу"], correct: 0},
-                {q: "Как звали мужа Делайлы, который погиб в драке?", options: ["У него не было мужа", "Хендерсон", "Уильям", "Дэвид"], correct: 0},
-                {q: "Какое прозвище дал Джо комику-педофилу Хендерсону во 2 сезоне?", options: ["Хенди", "Монстр в свитере", "Грязный комик", "Он его не называл прозвищем"], correct: 1},
-                {q: "Кто застрелил Лав Куинн в финале 3 сезона?", options: ["Джо", "Мэтью Ингленд", "Она сама себя", "Никто, она выжила"], correct: 0},
-                {q: "Какой бизнес пытались вести Джо и Лав в 3 сезоне в пригороде?", options: ["Пекарню-кафе", "Книжный ларек", "Ферму", "Цветочный магазин"], correct: 0},
-                {q: "Кем приходился Реддингтон персонажу Фиби в 4 сезоне?", options: ["Ее телохранителем / другом", "Ее дядей", "Ее мужем", "Ее адвокатом"], correct: 0},
-                {q: "Какая болезнь была у сына Джо (Генри) в 3 сезоне?", options: ["Корь", "Коклюш (скарлатина)", "Аллергия на арахис", "Воспаление уха"], correct: 1},
-                {q: "Куда Джо сбежал из пригорода после финала 3 сезона?", options: ["В Париж через Ликеру", "В Лондон", "В Канаду", "В Мексику"], correct: 1},
-                {q: "Как звали отца Лав и Форти?", options: ["Рэй Куинн", "Джордж Куинн", "Артур Куинн", "Чарльз Куинн"], correct: 0},
-                {q: "Какую книгу писал Форти Куинн во 2 сезоне?", options: ["Сценарий по мотивам жизни Бек", "Автобиографию", "Фантастический роман", "Кулинарную книгу"], correct: 0},
-                {q: "Кто узнал Джо в Лондоне самым первым в 4 сезоне?", options: ["Малкольм", "Рис Монро", "Кейт", "Никто"], correct: 0},
-                {q: "Какое прозвище пресса дала серийному убийце в Лондоне в 4 сезоне?", options: ["Убийца из Ист-Энда", "Рыцарь-убийца", "Убийца из высшего света (Eat the Rich)", "Британский мясник"], correct: 2},
-                {q: "Какой предмет Джо оставил на месте преступления в доме Бек, ставший уликой?", options: ["Кольцо", "Часы", "Очки", "Зажигалку"], correct: 1},
-                {q: "Как звали частного детектива, которого наняла семья Куинн для поисков Джо?", options: ["Миллер", "Куин", "Пенни", "Берт"], correct: 0},
-                {q: "В каком году вышел самый первый сезон сериала «Ты»?", options: ["2016", "2017", "2018", "2019"], correct: 2},
-                {q: "Какая актриса исполнила роль Лав Куинн?", options: ["Виктория Педретти", "Элизабет Леил", "Дженна Ортега", "Шарлотта Ричи"], correct: 0}
+                {q: "Как звали мужа Делайлы?", options: ["У него не было мужа", "Хендерсон", "Уильям", "Дэвид"], correct: 0},
+                {q: "Кем приходился Реддингтон персонажу Фиби в 4 сезоне?", options: ["Телохранителем / другом", "Дядей", "Мужем", "Адвокатом"], correct: 0},
+                {q: "Куда Джо сбежал из пригорода после 3 сезона?", options: ["В Париж", "В Лондон", "В Канаду", "В Мексику"], correct: 1},
+                {q: "Какой предмет Джо оставил на месте преступления у Бек?", options: ["Кольцо", "Часы", "Очки", "Зажигалку"], correct: 1},
+                {q: "Как звали частного детектива семьи Куинн?", options: ["Миллер", "Куин", "Пенни", "Берт"], correct: 0},
+                {q: "Кто помог Джо избавиться от тела Бена в 1 сезоне?", options: ["Никто, справился сам", "Пич", "Рон", "Пако"], correct: 0},
+                {q: "Какое прозвище дал Джо комику Хендерсону?", options: ["Хенди", "Монстр в свитере", "Грязный комик", "Не давал"], correct: 1},
+                {q: "Какая национальность была у охранника Рона?", options: ["Бывший военный / коп", "Испанец", "Ирландец", "Афроамериканец"], correct: 0},
+                {q: "В какой книге Джо прятал ключ от клетки в 1 сезоне?", options: ["Тайная история", "Властелин Колец", "Джейн Эйр", "В полу"], correct: 0},
+                {q: "Как звали соседку Джо во 2 сезоне (сестру Делайлы)?", options: ["Элли Алвес", "Надия", "Кейт", "Фиби"], correct: 0},
+                {q: "Какая актриса сыграла Бек?", options: ["Элизабет Леил", "Виктория Педретти", "Дженна Ортега", "Шарлотта Ричи"], correct: 0},
+                {q: "Где работала Бек до книжного магазина?", options: ["Официанткой / студентка", "В банке", "В журнале", "Не работала"], correct: 0}
             ],
             hard: [
-                {q: "Какая точная марка и модель телефона была у Бек в 1 сезоне?", options: ["iPhone 6", "iPhone 7", "iPhone X", "Samsung Galaxy"], correct: 1},
-                {q: "В какой именно аудитории университета Бек читала свое стихотворение в 1 сезоне?", options: ["Аудитория 304", "Аудитория 4B", "Корпус гуманитарных наук, ауд. 21", "Номер точной аудитории в сериале не назывался прямо"], correct: 3},
-                {q: "Какое реальное имя у актера, сыгравшего Джо Голдберга?", options: ["Пенн Бэджли", "Иэн Сомерхолдер", "Чейс Кроуфорд", "Мэтт Смит"], correct: 0},
-                {q: "Сколько всего эпизодов насчитывает первый сезон сериала «Ты»?", options: ["8", "10", "12", "13"], correct: 1},
-                {q: "На каком канале или стриминге сериал транслировался изначально до перехода на Netflix?", options: ["Lifetime", "HBO", "CW", "FX"], correct: 0},
-                {q: "Какая точная цифра указана в книге Кэролайн Кепнес на обложке оригинального романа «Ты»?", options: ["Там нет цифр", "Издание первое", "Роман написан по реальным событиям (выдумка)", "Название книги состоит только из слова 'You'"], correct: 3},
-                {q: "Какую именно книгу покупает Бен О'Рейлли в самом начале 1 сезона перед встречей с Бек?", options: ["«Гордость и предубеждение»", "«Великий Гэтсби»", "Сборник стихов Эмили Дикинсон", "«Цветы для Элджернона»"], correct: 2},
-                {q: "Как звали владельца элитного книжного магазина в 1 сезоне, у которого работал Джо?", options: ["Мистер Муни (настоящее имя в титрах: Рон Муни)", "Гораций (Mr. Mooney / полный титул в книге: Джордж)", "Генри Муни", "Имя владельца по сюжету — мистер Муни, полного имени не было"], correct: 3},
-                {q: "Какое точное имя у матери Джо, которое упоминается в редких флешбэках?", options: ["Сэнди", "Мэри", "Элизабет", "В сериале её называют просто 'мама' (в книге — Сэнди)"], correct: 3},
-                {q: "Какая литературная премия упоминается в контексте университетских успехов Бек?", options: ["Премия имени Фолкнера", "Стипендия факультета", "Творческий грант имени Адамса", "В сериале не упоминалась конкретная премия"], correct: 3},
-                {q: "Какое точное название у пансионата, где прятался Джо во 2 сезоне в Лос-Анджелесе?", options: ["Anavrin", "Sunset Vista", "Paramount Apartments", "Anavrin — это магазин, а отель не имел вывески"], correct: 3},
-                {q: "Сколько дней Джо продержал в стеклянной клетке Делайлу Куинн?", options: ["Ровно 3 дня", "Около недели", "Ровно 5 дней", "Точное количество дней в диалогах не акцентировалось"], correct: 3},
-                {q: "Какую марку пива предпочитал пить сосед Мэтью в 3 сезоне?", options: ["Budweiser", "Heineken", "Corona", "Марка пива в кадре намеренно замазывалась"], correct: 3},
-                {q: "Как звали собаку Пич Сэлинджер, которая пострадала от рук Джо?", options: ["Зузу", "Бак", "Пончик", "У нее не было собаки, была кошка по кличке... (в книге была собака, в сериале пес породы кавалер-кинг-чарльз-спаниель без имени)"], correct: 3},
-                {q: "Какое точное количество людей Джо официально убил за первые 3 сезона (по сюжету сериала)?", options: ["Ровно 5", "Более 8", "Точно не подсчитывалось, около 7-9 человек", "Ни одного, это всё самооборона"], correct: 2},
+                {q: "Какой фирменный элемент гардероба стал мемом среди фанатов Джо?", options: ["Черная бейсболка", "Синяя кепка", "Темная кепка для маскировки", "Шарф"], correct: 2},
+                {q: "Кто озвучивает закадровые мысли Джо на протяжении всех сезонов?", options: ["Пенн Бэджли", "Приглашенный актер", "Режиссер", "Никто"], correct: 0},
                 {q: "Кто написал оригинальную серию книг, по которой снят сериал?", options: ["Кэролайн Кепнес", "Стивен Кинг", "Гиллиан Флинн", "Дэн Браун"], correct: 0},
-                {q: "В каком году вышла в печать первая книга «Ты» (You)?", options: ["2012", "2014", "2016", "2018"], correct: 1},
-                {q: "Какая сцена из книги была полностью вырезана из первого сезона сериала?", options: ["Встреча Джо с отцом Бек", "Сцена в подвале с книгами", "Многочисленные внутренние монологи Джо о литературе", "Сюжетная линия с профессором Ники была короче в книге"], correct: 2},
-                {q: "Какое второе имя у главного героя Джо Голдберга по книге?", options: ["Эдвард", "Джозеф (полное имя)", "У него нет второго имени", "Бенджамин"], correct: 2},
-                {q: "Кто озвучивает закадровый голос (мысли Джо) на протяжении всех сезонов?", options: ["Пенн Бэджли", "Приглашенный актер озвучки", "Режиссер сериала", "Никто, это запись студии"], correct: 0},
-                {q: "Как звали девушку в финале 4 сезона, с которой Джо появляется на публике как признанный филантроп?", options: ["Кейт Локвуд", "Мэриен", "Леди Фиби", "Никто, он остался один"], correct: 0},
-                {q: "Какая общая черта объединяет практически всех главных женских персонажей, в которых влюблялся Джо?", options: ["Все они писательницы", "Все они имеют скрытые психологические травмы или тайны", "Все они богаты", "Все они блондинки"], correct: 1},
-                {q: "Какой музыкальный трек играет на финальных титрах пилотной серии 1 сезона?", options: ["Трогательная инди-мелодия", "Композиция Блейка Нили", "Популярный поп-трек 80-х", "В сериале титры идут под эмбиент-саундтрек"], correct: 1},
-                {q: "Какую профессию изначально выбирала для себя Бек до того, как увлеклась поэзией?", options: ["Журналистика", "Психология", "Маркетинг", "В сценарии этого не уточнялось"], correct: 3},
-                {q: "Какой фирменный элемент гардероба стал мемом среди фанатов Джо Голдберга?", options: ["Черная бейсболка", "Синяя кепка", "Темная кепка и кепка с козырьком для маскировки", "Шерстяной шарф"], correct: 2}
+                {q: "На каком канале сериал транслировался до перехода на Netflix?", options: ["Lifetime", "HBO", "CW", "FX"], correct: 0},
+                {q: "Какое реальное имя актера, сыгравшего Джо Голдберга?", options: ["Пенн Бэджли", "Иэн Сомерхолдер", "Чейс Кроуфорд", "Мэтт Смит"], correct: 0},
+                {q: "Сколько всего эпизодов насчитывает первый сезон?", options: ["8", "10", "12", "13"], correct: 1},
+                {q: "Какую именно книгу покупает Бен О'Рейлли в начале 1 сезона?", options: ["Гордость и предубеждение", "Великий Гэтсби", "Сборник стихов Эмили Дикинсон", "Цветы для Элджернона"], correct: 2},
+                {q: "Какая марка и модель телефона была у Бек в 1 сезоне?", options: ["iPhone 6", "iPhone 7", "iPhone X", "Samsung"], correct: 1},
+                {q: "В каком году вышла книга «You» Кэролайн Кепнес?", options: ["2012", "2014", "2016", "2018"], correct: 1},
+                {q: "Какое второе имя у главного героя Джо Голдберга по книге?", options: ["Эдвард", "Джозеф", "У него нет второго имени", "Бенджамин"], correct: 2},
+                {q: "Как звали девушку в финале 4 сезона, с которой Джо появляется как филантроп?", options: ["Кейт Локвуд", "Мэриен", "Леди Фиби", "Никто"], correct: 0},
+                {q: "Какая общая черта объединяет женщин, в которых влюблялся Джо?", options: ["Все писательницы", "Имеют скрытые психологические травмы или тайны", "Все богаты", "Все блондинки"], correct: 1},
+                {q: "Какое точное количество людей Джо официально убил за первые 3 сезона?", options: ["Ровно 5", "Более 8", "Около 7-9 человек", "Ни одного"], correct: 2},
+                {q: "Какая сцена из книги была полностью вырезана из 1 сезона сериала?", options: ["Встреча с отцом Бек", "Сцена в подвале", "Многочисленные внутренние монологи Джо о литературе", "Линия профессора Ники"], correct: 2},
+                {q: "В каком городе родился Пенн Бэджли?", options: ["Балтимор", "Нью-Йорк", "Лос-Анджелес", "Сиэтл"], correct: 0},
+                {q: "Как звали владельца элитного книжного магазина в 1 сезоне?", options: ["Мистер Муни", "Гораций", "Генри", "Пол"], correct: 0},
+                {q: "Какое имя было у мамы Джо в книге?", options: ["Сэнди", "Мэри", "Элизабет", "Анна"], correct: 0},
+                {q: "Какой породы была собака Пич Сэлинджер в сериале?", options: ["Кавалер-кинг-чарльз-спаниель", "Мопс", "Пудель", "Хаски"], correct: 0},
+                {q: "Сколько дней Джо продержал Делайлу в клетке?", options: ["Ровно 3 дня", "Около недели", "Ровно 5 дней", "Точно не указано"], correct: 3},
+                {q: "Как назывался отель/пансионат во 2 сезоне в Лос-Анджелесе?", options: ["Anavrin", "Sunset Vista", "Paramount Apartments", "Отел не имел вывески"], correct: 3},
+                {q: "Какую премию упоминает Бек в университете?", options: ["Премия Фолкнера", "Стипендия факультета", "Творческий грант Адамса", "Не упоминалась"], correct: 3},
+                {q: "Какое пиво пил сосед Мэтью в 3 сезоне?", options: ["Budweiser", "Heineken", "Corona", "Марка замазывалась в кадре"], correct: 3},
+                {q: "Какая музыка играет на титрах пилотной серии?", options: ["Инди-мелодия", "Композиция Блейка Нили", "Поп-трек", "Эмбиент-саундтрек"], correct: 1},
+                {q: "Какую профессию выбирала Бек до поэзии?", options: ["Журналистика", "Психология", "Маркетинг", "Не уточнялось"], correct: 3},
+                {q: "Какая точная цифра указана на обложке первой книги «Ты»?", options: ["Там нет цифр", "Издание первое", "Реальные события", "Только слово 'You'"], correct: 3}
             ]
         };
 
-        let currentDifficulty = 'easy';
         let currentQuestions = [];
         let currentQuestion = 0;
-        let score = 0;
-        let timerInterval;
-        let timeLeft = 30;
+        let score = "$0";
+        let isLocked = false;
 
-        function shuffle(array) {
-            let arr = [...array];
-            for (let i = arr.length - 1; i > 0; i--) {
-                let j = Math.floor(Math.random() * (i + 1));
-                [arr[i], arr[j]] = [arr[j], arr[i]];
-            }
-            return arr;
+        function shuffle(arr) {
+            return [...arr].sort(() => Math.random() - 0.5);
         }
 
-        function selectDifficulty(diff) {
-            currentDifficulty = diff;
-            // Берем случайные 10 вопросов из выбранного банка на 25 штук
-            currentQuestions = shuffle(banks[diff]).slice(0, 10);
+        function startGame() {
+            // Строго по 10 вопросов каждого уровня (всего 30 вопросов за игру)
+            const easyPart = shuffle(banks.easy).slice(0, 10);
+            const mediumPart = shuffle(banks.medium).slice(0, 10);
+            const hardPart = shuffle(banks.hard).slice(0, 10);
             
-            document.getElementById('difficulty-card').classList.add('hidden');
-            document.getElementById('top-bar').classList.remove('hidden');
-            startQuiz();
-        }
-
-        function goToMenu() {
-            clearInterval(timerInterval);
-            document.getElementById('top-bar').classList.add('hidden');
-            document.getElementById('quiz-card').classList.add('hidden');
-            document.getElementById('result-card').classList.add('hidden');
-            document.getElementById('difficulty-card').classList.remove('hidden');
-        }
-
-        function startQuiz() {
+            currentQuestions = [...easyPart, ...mediumPart, ...hardPart];
             currentQuestion = 0;
-            score = 0;
+            score = "$0";
+
             document.getElementById('quiz-card').classList.remove('hidden');
             document.getElementById('result-card').classList.add('hidden');
+            
             document.getElementById('fifty-btn').disabled = false;
+            document.getElementById('phone-btn').disabled = false;
             document.getElementById('audience-btn').disabled = false;
+
+            updateLadder();
             loadQuestion();
         }
 
-        function loadQuestion() {
-            clearInterval(timerInterval);
-            timeLeft = 30;
-            document.getElementById('timer').innerText = `⏱ ${timeLeft}с`;
+        function updateLadder() {
+            const container = document.getElementById('ladder-list');
+            container.innerHTML = '';
             
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                document.getElementById('timer').innerText = `⏱ ${timeLeft}с`;
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    handleAnswer(-1);
-                }
-            }, 1000);
+            // Группируем по уровням
+            const sections = [
+                { title: "🟢 Сложные вопросы (Сложный уровень)", start: 20, end: 29 },
+                { title: "🟡 Средние вопросы (Средний уровень)", start: 10, end: 19 },
+                { title: "🟢 Лёгкие вопросы (Лёгкий уровень)", start: 0, end: 9 }
+            ];
 
+            sections.forEach(sec => {
+                const titleEl = document.createElement('div');
+                titleEl.className = 'ladder-section-title';
+                titleEl.innerText = sec.title;
+                container.appendChild(titleEl);
+
+                for (let i = sec.end; i >= sec.start; i--) {
+                    const item = document.createElement('div');
+                    item.className = `ladder-item ${i === currentQuestion ? 'active' : ''}`;
+                    item.innerHTML = `<span>Вопрос ${i + 1}</span> <span>${prizes[i]}</span>`;
+                    container.appendChild(item);
+                }
+            });
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar-modal');
+            sidebar.classList.toggle('hidden');
+        }
+
+        function loadQuestion() {
+            isLocked = false;
+            updateLadder();
             const q = currentQuestions[currentQuestion];
-            document.getElementById('question-counter').innerText = `Вопрос ${currentQuestion + 1} из ${currentQuestions.length}`;
-            document.getElementById('question-container').innerText = q.q;
-            document.getElementById('score-display').innerText = `🏆 Сет: ${currentQuestion === 0 ? '$0' : prizes[currentQuestion - 1]}`;
+            document.getElementById('question-counter').innerText = `ВОПРОС ${currentQuestion + 1} из 30`;
+            document.getElementById('prize-counter').innerText = prizes[currentQuestion];
+            document.getElementById('question-text').innerText = q.q;
 
             const container = document.getElementById('options-container');
             container.innerHTML = '';
 
-            q.options.forEach((opt, index) => {
+            const prefixes = ["A", "B", "C", "D"];
+            q.options.forEach((opt, idx) => {
                 const btn = document.createElement('button');
                 btn.className = 'option-btn';
-                btn.innerText = opt;
-                btn.onclick = () => handleAnswer(index);
+                btn.innerHTML = `<span class="option-prefix">${prefixes[idx]}:</span> <span>${opt}</span>`;
+                btn.onclick = () => handleAnswer(idx, btn);
                 container.appendChild(btn);
             });
         }
 
-        function handleAnswer(selectedIndex) {
-            clearInterval(timerInterval);
+        function handleAnswer(selectedIndex, btnElement) {
+            if (isLocked) return;
+            isLocked = true;
+
+            playSound('select');
+            btnElement.classList.add('selected');
+
             const q = currentQuestions[currentQuestion];
             const buttons = document.querySelectorAll('.options-list button');
 
-            buttons.forEach(btn => btn.disabled = true);
+            // Увеличенная задержка и показ шкалы призов (дольше висит на экране)
+            setTimeout(() => {
+                btnElement.classList.remove('selected');
+                if (selectedIndex === q.correct) {
+                    btnElement.classList.add('correct');
+                    playSound('correct');
+                    score = prizes[currentQuestion];
 
-            if (selectedIndex === q.correct) {
-                buttons[selectedIndex].classList.add('correct');
-                score = prizes[currentQuestion];
-                setTimeout(() => {
-                    currentQuestion++;
-                    if (currentQuestion < currentQuestions.length) {
-                        loadQuestion();
-                    } else {
+                    setTimeout(() => {
+                        currentQuestion++;
+                        if (currentQuestion < currentQuestions.length) {
+                            loadQuestion();
+                            toggleSidebar(); // Показываем шкалу призов
+                            setTimeout(() => toggleSidebar(), 3000); // Держим ее открытой 3 секунды
+                        } else {
+                            showResults();
+                        }
+                    }, 2500);
+                } else {
+                    btnElement.classList.add('wrong');
+                    buttons[q.correct].classList.add('correct');
+                    playSound('wrong');
+
+                    setTimeout(() => {
                         showResults();
-                    }
-                }, 1000);
-            } else {
-                if (selectedIndex !== -1) {
-                    buttons[selectedIndex].classList.add('wrong');
+                    }, 2500);
                 }
-                buttons[q.correct].classList.add('correct');
-                setTimeout(() => {
-                    showResults();
-                }, 1500);
-            }
+            }, 2000);
         }
 
         function useFiftyFifty() {
@@ -460,43 +668,77 @@
             const q = currentQuestions[currentQuestion];
             const buttons = document.querySelectorAll('.options-list button');
             let removed = 0;
-            
-            buttons.forEach((btn, index) => {
-                if (index !== q.correct && removed < 2) {
+
+            buttons.forEach((btn, idx) => {
+                if (idx !== q.correct && removed < 2) {
                     btn.style.opacity = '0.2';
-                    btn.disabled = true;
+                    btn.style.pointerEvents = 'none';
                     removed++;
                 }
             });
         }
 
-        // Помощь зала: строго 60% за неправильный и 40% за правильный
+        function usePhone() {
+            document.getElementById('phone-btn').disabled = true;
+            const q = currentQuestions[currentQuestion];
+            const prefixes = ["A", "B", "C", "D"];
+            
+            const suggestIndex = Math.random() < 0.7 ? q.correct : (q.correct + 1) % 4;
+            const suggestLetter = prefixes[suggestIndex];
+
+            document.getElementById('phone-text').innerText = `Алло... Слушай, я сейчас занят книгами, но... я внимательно слежу за тобой. Мне кажется, тебе стоит выбрать вариант ${suggestLetter}. Надеюсь, ты не ошибешься. Ради твоего же блага.`;
+            document.getElementById('phone-modal').classList.remove('hidden');
+        }
+
+        // Помощь зала: зал чаще ошибается, проценты случайно и непредсказуемо распределяются по буквам
         function useAudience() {
             document.getElementById('audience-btn').disabled = true;
             const q = currentQuestions[currentQuestion];
-            const buttons = document.querySelectorAll('.options-list button');
+
+            // Генерируем случайные проценты так, чтобы правильный ответ не всегда доминировал
+            let p = [
+                Math.floor(Math.random() * 50) + 5,
+                Math.floor(Math.random() * 50) + 5,
+                Math.floor(Math.random() * 50) + 5,
+                Math.floor(Math.random() * 50) + 5
+            ];
+
+            let sum = p[0] + p[1] + p[2] + p[3];
+            p = p.map(val => Math.round((val / sum) * 100));
             
-            let incorrectIndices = [];
-            buttons.forEach((btn, idx) => {
-                if (idx !== q.correct) incorrectIndices.push(idx);
+            // Корректируем сумму до 100%
+            let diff = 100 - (p[0] + p[1] + p[2] + p[3]);
+            p[0] += diff;
+
+            let maxVal = Math.max(...p);
+
+            ['A', 'B', 'C', 'D'].forEach((letter, idx) => {
+                let val = p[idx];
+                document.getElementById(`val-${letter}`).innerText = `${val}%`;
+                const bar = document.getElementById(`bar-${letter}`);
+                bar.style.height = `${val}%`;
+                
+                if (val === maxVal) {
+                    bar.classList.add('highlight');
+                } else {
+                    bar.classList.remove('highlight');
+                }
             });
-            
-            const wrongIdx = incorrectIndices[Math.floor(Math.random() * incorrectIndices.length)];
-            
-            alert(`📊 Результаты голосования зала:\n\n• Вариант "${buttons[q.correct].innerText}": 40% зала\n• Вариант "${buttons[wrongIdx].innerText}": 60% зала (Мнение большинства)`);
+
+            document.getElementById('audience-modal').classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
         }
 
         function showResults() {
-            clearInterval(timerInterval);
             document.getElementById('quiz-card').classList.add('hidden');
             document.getElementById('result-card').classList.remove('hidden');
-            document.getElementById('final-score').innerText = score || "$0";
+            document.getElementById('final-score').innerText = score;
         }
 
-        function restartQuiz() {
-            // Перезапуск с тем же уровнем сложности, но с новой рандомной выборкой вопросов
-            selectDifficulty(currentDifficulty);
-        }
+        startGame();
     </script>
 </body>
 </html>

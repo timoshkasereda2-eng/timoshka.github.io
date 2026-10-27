@@ -61,7 +61,6 @@
             z-index: 1;
         }
 
-        /* Верхняя панель управления слева */
         .top-controls {
             position: absolute;
             top: 16px;
@@ -213,17 +212,25 @@
             border-color: #1e293b;
         }
 
+        /* Плавное выплывание боковой панели */
         .sidebar-modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(2, 4, 13, 0.85);
+            background: rgba(2, 4, 13, 0.7);
             display: flex;
             justify-content: flex-start;
             z-index: 100;
-            transition: 0.3s;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        .sidebar-modal.visible {
+            opacity: 1;
+            visibility: visible;
         }
 
         .sidebar-content {
@@ -236,6 +243,12 @@
             flex-direction: column;
             gap: 6px;
             overflow-y: auto;
+            transform: translateX(-100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .sidebar-modal.visible .sidebar-content {
+            transform: translateX(0);
         }
 
         .ladder-section-title {
@@ -316,6 +329,28 @@
             gap: 20px;
         }
 
+        /* Жёлтая кнопка старт на синем фоне */
+        .start-btn-yellow {
+            background: #f59e0b;
+            border: 1.5px solid #fbbf24;
+            color: #030718;
+            border-radius: 30px;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .start-btn-yellow:active {
+            transform: scale(0.97);
+            background: #d97706;
+            box-shadow: 0 0 25px #f59e0b;
+        }
+
         .restart-btn-glow {
             background: rgba(239, 68, 68, 0.2);
             border: 1.5px solid var(--wrong-red);
@@ -338,14 +373,21 @@
 <body>
 
     <div class="top-controls">
-        <button class="top-btn restart-btn-top" onclick="startGame()">🔄</button>
+        <button class="top-btn restart-btn-top" onclick="goToStartScreen()">🔄</button>
         <button class="top-btn" onclick="toggleSettings()">⚙️</button>
         <button class="top-btn" onclick="toggleSidebar()">📊</button>
     </div>
 
     <div class="app-container">
+        <!-- Экран приветствия (Старт) -->
+        <div id="start-screen" class="card result-screen">
+            <h2 style="font-size: 24px; color: #fff; margin-top: 10px;">Привет!</h2>
+            <p style="font-size: 15px; color: var(--text-muted); line-height: 1.4;">Ты хочешь начать игру по сериалу «ТЫ»?</p>
+            <button class="start-btn-yellow" onclick="startGame()">Начать игру</button>
+        </div>
+
         <!-- Игровой экран -->
-        <div id="quiz-card" class="card">
+        <div id="quiz-card" class="card hidden">
             <div class="header-info">
                 <span id="question-counter">ВОПРОС 1</span>
                 <span id="prize-counter" class="prize-text">$100</span>
@@ -362,8 +404,8 @@
             <div id="options-container" class="options-list"></div>
         </div>
 
-        <!-- Боковая панель лесенки (30 вопросов) -->
-        <div id="sidebar-modal" class="sidebar-modal hidden" onclick="toggleSidebar()">
+        <!-- Боковая панель лесенки с плавным выплыванием -->
+        <div id="sidebar-modal" class="sidebar-modal" onclick="toggleSidebar()">
             <div class="sidebar-content" onclick="event.stopPropagation()">
                 <h3 style="color: var(--gold-accent); text-align: center; margin-bottom: 5px;">ДЕНЕЖНАЯ ШКАЛА</h3>
                 <div id="ladder-list"></div>
@@ -586,12 +628,18 @@
             return [...arr].sort(() => Math.random() - 0.5);
         }
 
+        function goToStartScreen() {
+            document.getElementById('quiz-card').classList.add('hidden');
+            document.getElementById('result-card').classList.add('hidden');
+            document.getElementById('sidebar-modal').classList.remove('visible');
+            document.getElementById('start-screen').classList.remove('hidden');
+        }
+
         function startGame() {
             const easyPart = shuffle(banks.easy).slice(0, 10);
             const mediumPart = shuffle(banks.medium).slice(0, 10);
             const hardPart = shuffle(banks.hard).slice(0, 10);
             
-            // Перемешиваем сами вопросы и перемешиваем варианты ответов внутри каждого вопроса
             currentQuestions = [...easyPart, ...mediumPart, ...hardPart].map(q => {
                 let optionsWithIndex = q.options.map((opt, idx) => ({ text: opt, isCorrect: idx === q.correct }));
                 optionsWithIndex = shuffle(optionsWithIndex);
@@ -606,6 +654,7 @@
             currentQuestion = 0;
             score = "$0";
 
+            document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('quiz-card').classList.remove('hidden');
             document.getElementById('result-card').classList.add('hidden');
             
@@ -643,7 +692,7 @@
         }
 
         function toggleSidebar() {
-            document.getElementById('sidebar-modal').classList.toggle('hidden');
+            document.getElementById('sidebar-modal').classList.toggle('visible');
         }
 
         function toggleSettings() {
@@ -692,8 +741,8 @@
                         currentQuestion++;
                         if (currentQuestion < currentQuestions.length) {
                             loadQuestion();
-                            toggleSidebar();
-                            setTimeout(() => toggleSidebar(), 3000);
+                            toggleSidebar(); // Плавное выплывание шкалы
+                            setTimeout(() => toggleSidebar(), 3000); // Автоматически скрываем через 3 секунды
                         } else {
                             showResults();
                         }
@@ -737,7 +786,6 @@
             document.getElementById('phone-modal').classList.remove('hidden');
         }
 
-        // Помощь зала: полностью случайное распределение, зал часто ошибается и выдает разные комбинации
         function useAudience() {
             document.getElementById('audience-btn').disabled = true;
 
@@ -780,8 +828,6 @@
             document.getElementById('result-card').classList.remove('hidden');
             document.getElementById('final-score').innerText = score;
         }
-
-        startGame();
     </script>
 </body>
 </html>

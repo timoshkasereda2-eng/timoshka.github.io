@@ -91,6 +91,22 @@
             color: #ff8a8a;
         }
 
+        /* Счетчик побед справа вверху */
+        .win-counter-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--correct-green);
+            border-radius: 20px;
+            color: #a7f3d0;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 800;
+            z-index: 10;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+        }
+
         .card {
             background: rgba(9, 16, 43, 0.95);
             border: 1.5px solid var(--border-blue);
@@ -212,7 +228,6 @@
             border-color: #1e293b;
         }
 
-        /* Плавное выплывание боковой панели */
         .sidebar-modal {
             position: fixed;
             top: 0;
@@ -329,7 +344,6 @@
             gap: 20px;
         }
 
-        /* Жёлтая кнопка старт на синем фоне */
         .start-btn-yellow {
             background: #f59e0b;
             border: 1.5px solid #fbbf24;
@@ -378,11 +392,14 @@
         <button class="top-btn" onclick="toggleSidebar()">📊</button>
     </div>
 
+    <!-- Счетчик побед справа вверху -->
+    <div id="win-counter-badge" class="win-counter-badge">🏆 Побед: 0</div>
+
     <div class="app-container">
         <!-- Экран приветствия (Старт) -->
         <div id="start-screen" class="card result-screen">
-            <h2 style="font-size: 24px; color: #fff; margin-top: 10px;">Hello you</h2>
-            <p style="font-size: 15px; color: var(--text-muted); line-height: 1.4;">Если ты хочешь поучаствовать в викторине по сериалу "Ты" то нажымай старт</p>
+            <h2 style="font-size: 24px; color: #fff; margin-top: 10px;">Привет!</h2>
+            <p style="font-size: 15px; color: var(--text-muted); line-height: 1.4;">Ты хочешь начать игру по сериалу «ТЫ»?</p>
             <button class="start-btn-yellow" onclick="startGame()">Начать игру</button>
         </div>
 
@@ -464,12 +481,20 @@
             </div>
         </div>
 
-        <!-- Результат -->
+        <!-- Экран поражения -->
         <div id="result-card" class="card result-screen hidden">
             <h2 style="font-size: 24px; color: var(--wrong-red);">ИГРА ОКОНЧЕНА</h2>
             <div style="font-size: 13px; color: var(--text-muted);">ваш итоговый выигрыш</div>
             <div id="final-score" style="font-size: 36px; font-weight: 900; color: var(--gold-accent);">$0</div>
             <button class="restart-btn-glow" onclick="startGame()">НОВАЯ ИГРА</button>
+        </div>
+
+        <!-- Победный экран -->
+        <div id="win-card" class="card result-screen hidden">
+            <h2 style="font-size: 26px; color: var(--correct-green);">Ты прошел викторину</h2>
+            <div style="font-size: 14px; color: var(--text-muted);">абсолютная победа!</div>
+            <div style="font-size: 36px; font-weight: 900; color: var(--gold-accent);">$1,000,000</div>
+            <button class="start-btn-yellow" onclick="startGame()">УРА!</button>
         </div>
     </div>
 
@@ -479,6 +504,14 @@
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let globalVolume = 0.5;
+
+        // Загружаем количество побед из сохраненной памяти устройства/Telegram
+        let totalWins = parseInt(localStorage.getItem('you_quiz_wins') || '0', 10);
+        updateWinCounterDisplay();
+
+        function updateWinCounterDisplay() {
+            document.getElementById('win-counter-badge').innerText = `🏆 Побед: ${totalWins}`;
+        }
 
         function changeVolume(val) {
             globalVolume = parseFloat(val);
@@ -567,7 +600,7 @@
                 {q: "Какую книгу дал почитать Джо своему ученику Пако в 1 сезоне?", options: ["Преступление и наказание", "Война и мир", "Великий Гэтсби", "Одиссея"], correct: 0},
                 {q: "Как звали опекуна Джо в детском доме?", options: ["Мистер Муни", "Доктор Ники", "Рон", "Директор Карл"], correct: 0},
                 {q: "Какая деталь выдала Джо в квартире Пич Сэлинджер?", options: ["Его бейсболка", "Баночка с его мочой", "Его блокнот", "Кредитка"], correct: 1},
-                {q: "Кто убил Лав Куинн в финале 3 сезона?", options: ["Джо", "Мэтью Ингленд", "Она сама", "Никто"], correct: 0},
+                {q: "Кто застрелил Лав Куинн в финале 3 сезона?", options: ["Джо", "Мэтью Ингленд", "Она сама", "Никто"], correct: 0},
                 {q: "Какой бизнес пытались вести Джо и Лав в 3 сезоне?", options: ["Пекарню-кафе", "Книжный ларек", "Ферму", "Цветочный магазин"], correct: 0},
                 {q: "Какое прозвище пресса дала серийному убийце в 4 сезоне?", options: ["Убийца из Ист-Энда", "Рыцарь-убийца", "Убийца из высшего света (Eat the Rich)", "Британский мясник"], correct: 2},
                 {q: "Какую книгу писал Форти Куинн во 2 сезоне?", options: ["Сценарий по жизни Бек", "Автобиографию", "Фантастику", "Кулинарную книгу"], correct: 0},
@@ -631,6 +664,7 @@
         function goToStartScreen() {
             document.getElementById('quiz-card').classList.add('hidden');
             document.getElementById('result-card').classList.add('hidden');
+            document.getElementById('win-card').classList.add('hidden');
             document.getElementById('sidebar-modal').classList.remove('visible');
             document.getElementById('start-screen').classList.remove('hidden');
         }
@@ -657,6 +691,7 @@
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('quiz-card').classList.remove('hidden');
             document.getElementById('result-card').classList.add('hidden');
+            document.getElementById('win-card').classList.add('hidden');
             
             document.getElementById('fifty-btn').disabled = false;
             document.getElementById('phone-btn').disabled = false;
@@ -671,7 +706,7 @@
             container.innerHTML = '';
             
             const sections = [
-                { title: "🔴Сложные вопросы (Сложный уровень)", start: 20, end: 29 },
+                { title: "🔴 Сложные вопросы (Сложный уровень)", start: 20, end: 29 },
                 { title: "🟡 Средние вопросы (Средний уровень)", start: 10, end: 19 },
                 { title: "🟢 Лёгкие вопросы (Лёгкий уровень)", start: 0, end: 9 }
             ];
@@ -741,10 +776,10 @@
                         currentQuestion++;
                         if (currentQuestion < currentQuestions.length) {
                             loadQuestion();
-                            toggleSidebar(); // Плавное выплывание шкалы
-                            setTimeout(() => toggleSidebar(), 3000); // Автоматически скрываем через 3 секунды
+                            toggleSidebar();
+                            setTimeout(() => toggleSidebar(), 3000);
                         } else {
-                            showResults();
+                            showWin();
                         }
                     }, 2500);
                 } else {
@@ -826,7 +861,16 @@
         function showResults() {
             document.getElementById('quiz-card').classList.add('hidden');
             document.getElementById('result-card').classList.remove('hidden');
-            document.getElementById('final-score').innerText = score;
+        }
+
+        function showWin() {
+            // Увеличиваем счетчик побед на 1 и сохраняем в память
+            totalWins++;
+            localStorage.setItem('you_quiz_wins', totalWins);
+            updateWinCounterDisplay();
+
+            document.getElementById('quiz-card').classList.add('hidden');
+            document.getElementById('win-card').classList.remove('hidden');
         }
     </script>
 </body>
